@@ -3,6 +3,7 @@ import cors from "cors"
 import { MongoClient, ObjectId } from "mongodb"
 import dotenv from "dotenv"
 import joi from "joi"
+import dayjs from "dayjs"
 
 dotenv.config()
 const mongoClient = new MongoClient(process.env.DATABASE_URL)
@@ -22,7 +23,6 @@ app.post("/participants", async (req, res) => {
     const entry = Date.now()
     const participantSchema = joi.object({
         name: joi.string().required(),
-        lastStatus:entry,
     });
     const validation = participantSchema.validate(participant, {pick:["name"],abortEarly:false})
     console.log(validation)
@@ -33,9 +33,13 @@ app.post("/participants", async (req, res) => {
     try {
         const findName = await db.collection("participants").findOne({name:participant.name})
         if(findName) return res.status(409).send("Já existe com esse nome")
+        const time = dayjs().format("HH:mm:ss")
         await db
             .collection('participants')
-            .insertOne(participant)
+            .insertOne({name:participant.name, lastStatus:entry})
+        await db
+            .collection("messages")
+            .insertOne({from: participant.name, to: 'Todos', text: 'entra na sala...', type: 'status', time: time})
         res.sendStatus(201)
     } catch (error) {
         console.log(error)
