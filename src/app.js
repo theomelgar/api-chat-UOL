@@ -103,7 +103,17 @@ app.get("/messages", async (req, res) => {
 })
 app.post("/status", async (req, res) => {
     try {
-        
+        const {user} = req.headers
+        const list = await db
+        .collection("participants")
+        .find({name:user})
+        .toArray()
+        const entry = Date.now()
+        await db
+            .collection('participants')
+            .udateOne({lastStatus:entry})
+        if(!list) res.status(404)
+        res.sendStatus(200)
     } catch (error) {
         console.log(error)
         res.sendStatus(500)
