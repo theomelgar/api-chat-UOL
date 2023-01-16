@@ -59,8 +59,27 @@ app.get("/participants", async (req, res) => {
     }
 })
 app.post("/messages", async (req, res) => {
+    const message = req.body
+    const from = req.headers.User
+    const messageSchema = joi.object({
+        to: joi.string().required(),
+        text: joi.string().required(),
+        type: joi.string().required().valid("message", "private_message"),
+    });
+    const validation = messageSchema.validate(message, {pick:["to","text","type"],abortEarly:false})
+    console.log(validation)
+    if (validation.error){
+        const errors = validation.error.details.map((detail) => detail.message)
+        return res.status(422).send(errors)
+    }
     try {
-
+        const findName = await db.collection("participants").findOne({name:from})
+        if(!findName) return res.status(422).send("Não existe com esse nome")
+        const time = dayjs().format("HH:mm:ss")
+        await db
+            .collection("messages")
+            .insertOne({from:from, to: message.to, text: message.text, type: message.type, time: time})
+        res.sendStatus(201)
     } catch (error) {
         console.log(error)
         res.sendStatus(500)
@@ -68,7 +87,15 @@ app.post("/messages", async (req, res) => {
 })
 app.get("/messages", async (req, res) => {
     try {
-
+        const {limit} = parseInt(req.query.limit)
+        const {user} = req.query.user
+        const list = await db
+        .collection("messages")
+        .find({$or : [{type:"status"},{type:"message"},{to:user},{from:user}]})
+        .toArray()
+        if(limit)res.send(list.slice(-limit))
+        if(limit < 1 || isNaN(limit)) res.sendStatus(422)
+        res.send(list)
     } catch (error) {
         console.log(error)
         res.sendStatus(500)
@@ -76,7 +103,7 @@ app.get("/messages", async (req, res) => {
 })
 app.post("/status", async (req, res) => {
     try {
-
+        
     } catch (error) {
         console.log(error)
         res.sendStatus(500)
