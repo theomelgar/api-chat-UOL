@@ -95,15 +95,14 @@ app.post("/messages", async (req, res) => {
 })
 app.get("/messages", async (req, res) => {
     try {
-        const { limit } = parseInt(req.query.limit)
+        const limit = parseInt(req.query.limit)
         const from = req.headers.user
         const list = await db
             .collection("messages")
             .find({ $or: [{ type: "status" }, { type: "message" }, { to: from }, { from: from }] })
             .toArray()
         if (limit) res.send(list.slice(-limit))
-        if (limit < 1 || isNaN(limit)) res.sendStatus(422)
-        res.send(list)
+        return res.send(list)
     } catch (error) {
         console.log(error)
         res.sendStatus(500)
@@ -119,7 +118,7 @@ app.post("/status", async (req, res) => {
         const entry = Date.now()
         await db
             .collection('participants')
-            .udateOne({ name: user }, { $set: { lastStatus: entry } })
+            .updateOne({ name: user }, { $set: { lastStatus: entry } })
         if (!list) res.status(404)
         res.sendStatus(200)
     } catch (error) {
@@ -145,7 +144,7 @@ async function removeParticipants() {
                     .insertOne({
                         from: participant.name,
                         to: 'Todos',
-                        text: 'sai na sala...',
+                        text: 'sai da sala...',
                         type: 'status',
                         time: time
                     })
