@@ -96,10 +96,10 @@ app.post("/messages", async (req, res) => {
 app.get("/messages", async (req, res) => {
     try {
         const { limit } = parseInt(req.query.limit)
-        const { user } = req.query.user
+        const from = req.headers.user
         const list = await db
             .collection("messages")
-            .find({ $or: [{ type: "status" }, { type: "message" }, { to: user }, { from: user }] })
+            .find({ $or: [{ type: "status" }, { type: "message" }, { to: from }, { from: from }] })
             .toArray()
         if (limit) res.send(list.slice(-limit))
         if (limit < 1 || isNaN(limit)) res.sendStatus(422)
