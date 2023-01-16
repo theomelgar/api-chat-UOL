@@ -157,7 +157,7 @@ async function removeParticipants() {
     }
 }
 
-// setInterval(removeParticipants, 15000)
+setInterval(removeParticipants, 15000)
 const PORT = process.env.PORT
 
 app.listen(PORT, () => console.log("Server online in " + PORT)) 
