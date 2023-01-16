@@ -98,11 +98,11 @@ app.post("/messages", async (req, res) => {
 })
 app.get("/messages", async (req, res) => {
     try {
-        const validQueryLimit =
+        const validLimit =
             !!req.query.limit &&
             Number.isInteger(+req.query.limit) &&
             +req.query.limit > 0;
-        if (!!req.query.limit && !validQueryLimit) {
+        if (!!req.query.limit && !validLimit) {
             return res.sendStatus(422);
         }
         const from = req.headers.user
