@@ -125,6 +125,22 @@ app.get("/messages", async (req, res) => {
         res.sendStatus(500)
     }
 })
+app.delete("/messages/:id", async (req, res) =>{
+    const id = req.params.id
+    const {user} = req.headers
+    try {
+        const list = await db
+        .collection("messages")
+        .findOne({ _id: new ObjectId(id) })
+        if(!list) return res.sendStatus(404)
+        if(list.from !== user) return res.sendStatus(401)
+        await db.collection("messages").deleteOne({ _id: new ObjectId(id) })
+        return res.send("Deleted")
+    } catch (error) {
+        console.log(error)
+        res.sendStatus(500)
+    }
+})
 app.post("/status", async (req, res) => {
     try {
         const { user } = req.headers
