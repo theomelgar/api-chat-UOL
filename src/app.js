@@ -66,7 +66,7 @@ app.get("/participants", async (req, res) => {
 })
 app.post("/messages", async (req, res) => {
     const message = req.body
-    const from = req.headers.User
+    const from = req.headers.user
     const messageSchema = joi.object({
         to: joi.string().required(),
         text: joi.string().required(),
@@ -79,7 +79,9 @@ app.post("/messages", async (req, res) => {
         return res.status(422).send(errors)
     }
     try {
-        const findName = await db.collection("participants").findOne({ name: from })
+        const findName = await db
+            .collection("participants")
+            .findOne({ name: from })
         if (!findName) return res.status(422).send("Não existe com esse nome")
         const time = dayjs().format("HH:mm:ss")
         await db
@@ -143,7 +145,7 @@ async function removeParticipants() {
                     .insertOne({
                         from: participant.name,
                         to: 'Todos',
-                        text: 'saiu na sala...',
+                        text: 'sai na sala...',
                         type: 'status',
                         time: time
                     })
@@ -155,7 +157,7 @@ async function removeParticipants() {
     }
 }
 
-setInterval(removeParticipants, 15000);
+// setInterval(removeParticipants, 15000)
 const PORT = process.env.PORT
 
 app.listen(PORT, () => console.log("Server online in " + PORT)) 
