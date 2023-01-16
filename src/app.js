@@ -216,7 +216,6 @@ async function removeParticipants() {
         })
     } catch (error) {
         console.log(error)
-        res.sendStatus(500)
     }
 }
 
