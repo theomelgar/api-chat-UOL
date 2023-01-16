@@ -102,7 +102,7 @@ app.get("/messages", async (req, res) => {
             .find({ $or: [{ type: "status" }, { type: "message" }, { to: from }, { from: from }] })
             .toArray()
         if (limit) res.send(list.slice(-limit))
-        return res.send(list)
+        res.send(list)
     } catch (error) {
         console.log(error)
         res.sendStatus(500)
@@ -115,11 +115,12 @@ app.post("/status", async (req, res) => {
             .collection("participants")
             .find({ name: user })
             .toArray()
+        if (!list) res.sendStatus(404)
         const entry = Date.now()
         await db
             .collection('participants')
             .updateOne({ name: user }, { $set: { lastStatus: entry } })
-        if (!list) res.status(404)
+
         res.sendStatus(200)
     } catch (error) {
         console.log(error)
