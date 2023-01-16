@@ -4,7 +4,6 @@ import { MongoClient, ObjectId } from "mongodb"
 import dotenv from "dotenv"
 import joi from "joi"
 import dayjs from "dayjs"
-import { strict as assert } from "assert";
 import { stripHtml } from "string-strip-html";
 
 dotenv.config()
@@ -41,7 +40,7 @@ app.post("/participants", async (req, res) => {
         const time = dayjs().format("HH:mm:ss")
         await db
             .collection('participants')
-            .insertOne({ name: participant.name.trim(), lastStatus: entry })
+            .insertOne({ name: stripHtml(participant.name.trim()).result, lastStatus: entry })
         await db
             .collection("messages")
             .insertOne({
@@ -91,7 +90,7 @@ app.post("/messages", async (req, res) => {
         const time = dayjs().format("HH:mm:ss")
         await db
             .collection("messages")
-            .insertOne({ from: from, to: message.to, text: message.text.trim(), type: message.type, time: time })
+            .insertOne({ from: from, to: message.to, text: stripHtml(message.text.trim()).result, type: message.type, time: time })
         res.sendStatus(201)
     } catch (error) {
         console.log(error)
@@ -183,7 +182,7 @@ app.post("/status", async (req, res) => {
         const entry = Date.now()
         await db
             .collection('participants')
-            .updateOne({ name: user.trim() }, { $set: { lastStatus: entry } })
+            .updateOne({ name: stripHtml(user.trim()).result }, { $set: { lastStatus: entry } })
 
         res.sendStatus(200)
     } catch (error) {
