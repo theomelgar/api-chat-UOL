@@ -4,7 +4,9 @@ import { MongoClient, ObjectId } from "mongodb"
 import dotenv from "dotenv"
 import joi from "joi"
 import dayjs from "dayjs"
+// import { validationParticipant, validationMessages } from "./schemas.js"
 
+const PORT = process.env.PORT
 dotenv.config()
 const mongoClient = new MongoClient(process.env.DATABASE_URL)
 let db
@@ -96,14 +98,28 @@ app.post("/messages", async (req, res) => {
 app.get("/messages", async (req, res) => {
     try {
         const limit = parseInt(req.query.limit)
+        const validLimit =
+            !!req.query.limit &&
+            Number.isInteger(+limit) &&
+            +limit > 0;
+        if (!!limit && !validLimit) {
+            return res.sendStatus(422);
+        }
         const from = req.headers.user
         const list = await db
             .collection("messages")
-            .find({ $or: [{ type: "status" }, { type: "message" }, { to: from }, { from: from }] })
+            .find({
+                $or: [
+                    { type: 'message' },
+                    { type: 'status' },
+                    { from: from },
+                    { to: from },
+                ]
+            })
+            .sort({ $natural: validLimit ? -1 : 1 })
+            .limit(validLimit ? +limit : 0)
             .toArray()
-        if (limit < 1 || isNaN(limit)) return res.sendStatus(422);
-        if (limit)return res.send(list.slice(-limit))
-        res.send(list)
+        return res.send(list)
     } catch (error) {
         console.log(error)
         res.sendStatus(500)
@@ -158,6 +174,5 @@ async function removeParticipants() {
 }
 
 setInterval(removeParticipants, 15000)
-const PORT = process.env.PORT
 
 app.listen(PORT, () => console.log("Server online in " + PORT)) 
