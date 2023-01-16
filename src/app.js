@@ -145,15 +145,10 @@ app.put("/messages/:id", async (req, res) => {
             .collection("messages")
             .findOne({ _id: new ObjectId(id) })
         if (!list) return res.sendStatus(404)
-        const findName = await db
-            .collection("participants")
-            .findOne({ name: from })
-        if (!findName) return res.status(422).send("Não existe com esse nome")
         if (list.from !== from) return res.sendStatus(401)
-        const time = dayjs().format("HH:mm:ss")
         await db
             .collection("messages")
-            .updateOne({ from: from, to: message.to, text: message.text, type: message.type, time: time })
+            .updateOne({_id:ObjectId(id)},{$set: {from: from, to: message.to, text: message.text, type: message.type}})
         res.send("Edited")
     } catch (error) {
         console.log(error)
