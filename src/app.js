@@ -39,11 +39,11 @@ app.post("/participants", async (req, res) => {
         const time = dayjs().format("HH:mm:ss")
         await db
             .collection('participants')
-            .insertOne({ name: participant.name, lastStatus: entry })
+            .insertOne({ name: assert.equal(stripHtml(participant.name)).trim(), lastStatus: entry })
         await db
             .collection("messages")
             .insertOne({
-                from: participant.name,
+                from: assert.equal(stripHtml(participant.name)).trim(),
                 to: 'Todos',
                 text: 'entra na sala...',
                 type: 'status',
@@ -89,7 +89,7 @@ app.post("/messages", async (req, res) => {
         const time = dayjs().format("HH:mm:ss")
         await db
             .collection("messages")
-            .insertOne({ from: from, to: message.to, text: message.text, type: message.type, time: time })
+            .insertOne({ from: from, to: message.to, text: assert.equal(stripHtml(message.text)).trim(), type: message.type, time: time })
         res.sendStatus(201)
     } catch (error) {
         console.log(error)
@@ -181,7 +181,7 @@ app.post("/status", async (req, res) => {
         const entry = Date.now()
         await db
             .collection('participants')
-            .updateOne({ name: user }, { $set: { lastStatus: entry } })
+            .updateOne({ name: assert.equal(stripHtml(user)).trim() }, { $set: { lastStatus: entry } })
 
         res.sendStatus(200)
     } catch (error) {
