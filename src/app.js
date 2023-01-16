@@ -4,9 +4,7 @@ import { MongoClient, ObjectId } from "mongodb"
 import dotenv from "dotenv"
 import joi from "joi"
 import dayjs from "dayjs"
-// import { validationParticipant, validationMessages } from "./schemas.js"
 
-const PORT = process.env.PORT
 dotenv.config()
 const mongoClient = new MongoClient(process.env.DATABASE_URL)
 let db
@@ -20,6 +18,9 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 db = mongoClient.db()
+
+const PORT = process.env.PORT
+
 app.post("/participants", async (req, res) => {
     const participant = req.body
     const entry = Date.now()
@@ -97,9 +98,9 @@ app.post("/messages", async (req, res) => {
 })
 app.get("/messages", async (req, res) => {
     try {
-        const limit = parseInt(req.query.limit)
+        const limit = req.query.limit
         const validLimit =
-            !!req.query.limit &&
+            !!limit &&
             Number.isInteger(+limit) &&
             +limit > 0;
         if (!!limit && !validLimit) {
