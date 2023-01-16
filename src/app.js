@@ -101,7 +101,8 @@ app.get("/messages", async (req, res) => {
             .collection("messages")
             .find({ $or: [{ type: "status" }, { type: "message" }, { to: from }, { from: from }] })
             .toArray()
-        if (limit) res.send(list.slice(-limit))
+        if (limit < 1 || isNaN(limit)) return res.sendStatus(422);
+        if (limit)return res.send(list.slice(-limit))
         res.send(list)
     } catch (error) {
         console.log(error)
@@ -113,9 +114,8 @@ app.post("/status", async (req, res) => {
         const { user } = req.headers
         const list = await db
             .collection("participants")
-            .find({ name: user })
-            .toArray()
-        if (!list) res.sendStatus(404)
+            .findOne({ name: user })
+        if (!list) return res.sendStatus(404)
         const entry = Date.now()
         await db
             .collection('participants')
