@@ -98,12 +98,11 @@ app.post("/messages", async (req, res) => {
 })
 app.get("/messages", async (req, res) => {
     try {
-        const limit = req.query.limit
-        const validLimit =
-            !!limit &&
-            Number.isInteger(+limit) &&
-            +limit > 0;
-        if (!!limit && !validLimit) {
+        const validQueryLimit =
+            !!req.query.limit &&
+            Number.isInteger(+req.query.limit) &&
+            +req.query.limit > 0;
+        if (!!req.query.limit && !validQueryLimit) {
             return res.sendStatus(422);
         }
         const from = req.headers.user
@@ -118,7 +117,7 @@ app.get("/messages", async (req, res) => {
                 ]
             })
             .sort({ $natural: validLimit ? -1 : 1 })
-            .limit(validLimit ? +limit : 0)
+            .limit(validLimit ? +req.query.limit : 0)
             .toArray()
         return res.send(list)
     } catch (error) {
