@@ -172,7 +172,7 @@ app.delete("/messages/:id", async (req, res) => {
         res.sendStatus(500)
     }
 })
-app.post("/status", async (req, res) => {
+app.put("/status", async (req, res) => {
     try {
         const { user } = req.headers
         const list = await db
